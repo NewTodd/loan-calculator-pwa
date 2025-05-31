@@ -4,54 +4,51 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Loan Calculator</title>
-  <link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#2196f3">
-<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
-</head>
-
+  <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#2196f3" />
   <style>
     :root {
-      --primary: #4f46e5;
-      --background: #f9fafb;
-      --card-bg: #ffffff;
-      --text: #111827;
-      --muted: #6b7280;
+      --primary: #2196f3;
+      --background: #f4f6f8;
+      --text: #1f2937;
+      --card: #ffffff;
       --radius: 12px;
-    }
-
-    * {
-      box-sizing: border-box;
     }
 
     body {
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       background-color: var(--background);
-      color: var(--text);
-      padding: 2rem;
       margin: 0;
+      padding: 2rem;
       display: flex;
-      justify-content: center;
-      align-items: flex-start;
-      min-height: 100vh;
+      flex-direction: column;
+      align-items: center;
+      color: var(--text);
     }
 
     .container {
-      max-width: 500px;
-      width: 100%;
-      background: var(--card-bg);
+      background: var(--card);
       padding: 2rem;
       border-radius: var(--radius);
-      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+      max-width: 500px;
+      width: 100%;
+      text-align: center;
+    }
+
+    .container img {
+      width: 64px;
+      margin-bottom: 1rem;
     }
 
     h1 {
       margin-bottom: 1rem;
-      font-size: 1.8rem;
-      text-align: center;
+      color: var(--primary);
     }
 
     label {
       display: block;
+      text-align: left;
       margin-top: 1rem;
       font-weight: 600;
     }
@@ -59,20 +56,19 @@
     input {
       width: 100%;
       padding: 0.75rem;
-      border: 1px solid #d1d5db;
-      border-radius: var(--radius);
       margin-top: 0.5rem;
+      border-radius: var(--radius);
+      border: 1px solid #d1d5db;
       font-size: 1rem;
     }
 
     button {
       width: 100%;
-      padding: 0.75rem;
       margin-top: 1.5rem;
-      background: var(--primary);
-      color: white;
+      padding: 0.75rem;
       font-size: 1rem;
-      font-weight: 600;
+      background-color: var(--primary);
+      color: white;
       border: none;
       border-radius: var(--radius);
       cursor: pointer;
@@ -80,37 +76,47 @@
     }
 
     button:hover {
-      background: #db1bab77;
+      background-color: #1976d2;
     }
 
     pre {
-      margin-top: 2rem;
-      background-color: #f3f4f6;
+      text-align: left;
+      background: #e5e7eb;
       padding: 1rem;
       border-radius: var(--radius);
+      margin-top: 2rem;
       overflow-x: auto;
-      font-size: 0.95rem;
       white-space: pre-wrap;
+    }
+
+    footer {
+      margin-top: 2rem;
+      font-size: 0.9rem;
+      color: #6b7280;
+      text-align: center;
     }
   </style>
 </head>
 <body>
   <div class="container">
+    <img src="icon-192.png" alt="App Icon">
     <h1>Loan Calculator</h1>
 
-    <label for="loanAmount">Loan Amount ($)</label>
+    <label for="loanAmount">Loan Amount ($):</label>
     <input type="number" id="loanAmount" />
 
-    <label for="apr">APR (%)</label>
+    <label for="apr">APR (%):</label>
     <input type="number" step="0.01" id="apr" />
 
-    <label for="monthlyPayment">Monthly Payment ($)</label>
+    <label for="monthlyPayment">Monthly Payment ($):</label>
     <input type="number" id="monthlyPayment" />
 
     <button onclick="calculateLoan()">Calculate</button>
 
     <pre id="result">Result will appear here...</pre>
   </div>
+
+  <footer>© 2025 by Todd Vong</footer>
 
   <script>
     if ('serviceWorker' in navigator) {
@@ -132,7 +138,7 @@
       const payment = parseFloat(document.getElementById('monthlyPayment').value);
 
       if (!loan || !apr || !payment || loan <= 0 || apr < 0 || payment <= 0) {
-        document.getElementById('result').textContent = "Please enter valid loan amount, APR, and payment.";
+        document.getElementById('result').textContent = "Please enter valid numbers.";
         return;
       }
 
@@ -141,7 +147,7 @@
       let totalPaid = 0;
       let totalInterest = 0;
       let month = 1;
-      let result = `Month\tInterest\tPrincipal\tBalance\n`;
+      let result = "Month\tInterest\tPrincipal\tBalance\n";
 
       while (balance > 0) {
         let interest = +(balance * monthlyRate).toFixed(2);
@@ -167,7 +173,5 @@
       document.getElementById('result').textContent = result;
     }
   </script>
-  <footer>By Todd Vong</footer>
 </body>
 </html>
-
