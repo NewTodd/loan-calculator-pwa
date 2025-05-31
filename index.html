@@ -1,92 +1,172 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Loan Calculator</title>
-    <link rel="manifest" href="manifest.json">
-    <script>
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('service-worker.js')
-                .then(() => console.log('Service Worker registered'))
-                .catch(error => console.error('Service Worker registration failed:', error));
-        }
-    </script>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            padding: 20px;
-            max-width: 600px;
-            margin: auto;
-        }
-        input, button {
-            padding: 10px;
-            margin: 5px 0;
-            width: 100%;
-        }
-        pre {
-            background-color: #797d94;
-            padding: 10px;
-            overflow-x: auto;
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Loan Calculator</title>
+  <link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#2196f3">
+
+  <style>
+    :root {
+      --primary: #4f46e5;
+      --background: #f9fafb;
+      --card-bg: #ffffff;
+      --text: #111827;
+      --muted: #6b7280;
+      --radius: 12px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: var(--background);
+      color: var(--text);
+      padding: 2rem;
+      margin: 0;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 500px;
+      width: 100%;
+      background: var(--card-bg);
+      padding: 2rem;
+      border-radius: var(--radius);
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+    }
+
+    h1 {
+      margin-bottom: 1rem;
+      font-size: 1.8rem;
+      text-align: center;
+    }
+
+    label {
+      display: block;
+      margin-top: 1rem;
+      font-weight: 600;
+    }
+
+    input {
+      width: 100%;
+      padding: 0.75rem;
+      border: 1px solid #d1d5db;
+      border-radius: var(--radius);
+      margin-top: 0.5rem;
+      font-size: 1rem;
+    }
+
+    button {
+      width: 100%;
+      padding: 0.75rem;
+      margin-top: 1.5rem;
+      background: var(--primary);
+      color: white;
+      font-size: 1rem;
+      font-weight: 600;
+      border: none;
+      border-radius: var(--radius);
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+
+    button:hover {
+      background: #db1bab77;
+    }
+
+    pre {
+      margin-top: 2rem;
+      background-color: #f3f4f6;
+      padding: 1rem;
+      border-radius: var(--radius);
+      overflow-x: auto;
+      font-size: 0.95rem;
+      white-space: pre-wrap;
+    }
+  </style>
 </head>
 <body>
+  <div class="container">
     <h1>Loan Calculator</h1>
-    <label>Loan Amount ($):</label>
+
+    <label for="loanAmount">Loan Amount ($)</label>
     <input type="number" id="loanAmount" />
 
-    <label>APR (%):</label>
+    <label for="apr">APR (%)</label>
     <input type="number" step="0.01" id="apr" />
 
-    <label>Monthly Payment ($):</label>
+    <label for="monthlyPayment">Monthly Payment ($)</label>
     <input type="number" id="monthlyPayment" />
 
     <button onclick="calculateLoan()">Calculate</button>
 
-    <h2>Result:</h2>
-    <pre id="result"></pre>
+    <pre id="result">Result will appear here...</pre>
+  </div>
 
-    <script>
-        function formatCurrency(value) {
-            return value.toLocaleString('en-US', { style: 'currency', currency: 'USD' });
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('service-worker.js')
+        .then(() => console.log('Service Worker registered'))
+        .catch(error => console.error('Service Worker registration failed:', error));
+    }
+
+    function formatCurrency(value) {
+      return value.toLocaleString('en-US', {
+        style: 'currency',
+        currency: 'USD',
+      });
+    }
+
+    function calculateLoan() {
+      const loan = parseFloat(document.getElementById('loanAmount').value);
+      const apr = parseFloat(document.getElementById('apr').value);
+      const payment = parseFloat(document.getElementById('monthlyPayment').value);
+
+      if (!loan || !apr || !payment || loan <= 0 || apr < 0 || payment <= 0) {
+        document.getElementById('result').textContent = "Please enter valid loan amount, APR, and payment.";
+        return;
+      }
+
+      let balance = loan;
+      const monthlyRate = apr / 12 / 100;
+      let totalPaid = 0;
+      let totalInterest = 0;
+      let month = 1;
+      let result = `Month\tInterest\tPrincipal\tBalance\n`;
+
+      while (balance > 0) {
+        let interest = +(balance * monthlyRate).toFixed(2);
+        let principal = payment - interest;
+
+        if (principal > balance) {
+          principal = balance;
+          payment = interest + principal;
         }
 
-        function calculateLoan() {
-            let loan = parseFloat(document.getElementById('loanAmount').value);
-            let apr = parseFloat(document.getElementById('apr').value);
-            let payment = parseFloat(document.getElementById('monthlyPayment').value);
+        balance = +(balance - principal).toFixed(2);
+        totalPaid += payment;
+        totalInterest += interest;
 
-            let balance = loan;
-            let monthlyRate = apr / 12 / 100;
-            let totalPaid = 0;
-            let totalInterest = 0;
-            let month = 1;
-            let result = "Month\tInterest\tPrincipal\tBalance\n";
+        result += `${month}\t${formatCurrency(interest)}\t${formatCurrency(principal)}\t${formatCurrency(balance)}\n`;
+        month++;
+      }
 
-            while (balance > 0) {
-                let interest = +(balance * monthlyRate).toFixed(2);
-                let principal = payment - interest;
+      result += `\nTotal Paid: ${formatCurrency(totalPaid)}\n`;
+      result += `Total Interest: ${formatCurrency(totalInterest)}\n`;
+      result += `Months: ${month - 1}`;
 
-                if (principal > balance) {
-                    principal = balance;
-                    payment = interest + principal;
-                }
-
-                balance = +(balance - principal).toFixed(2);
-                totalPaid += payment;
-                totalInterest += interest;
-
-                result += `${month}\t${formatCurrency(interest)}\t${formatCurrency(principal)}\t${formatCurrency(balance)}\n`;
-                month++;
-            }
-
-            result += `\nTotal Paid: ${formatCurrency(totalPaid)}\n`;
-            result += `Total Interest: ${formatCurrency(totalInterest)}\n`;
-            result += `Months: ${month - 1}`;
-
-            document.getElementById('result').textContent = result;
-        }
-    </script>
+      document.getElementById('result').textContent = result;
+    }
+  </script>
+  
 </body>
+<footer>By Todd Vong</footer>
 </html>
+
