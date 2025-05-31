@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Loan Calculator</title>
+    <link rel="manifest" href="manifest.json">
+    <script>
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('service-worker.js')
+                .then(() => console.log('Service Worker registered'))
+                .catch(error => console.error('Service Worker registration failed:', error));
+        }
+    </script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            max-width: 600px;
+            margin: auto;
+        }
+        input, button {
+            padding: 10px;
+            margin: 5px 0;
+            width: 100%;
+        }
+        pre {
+            background-color: #797d94;
+            padding: 10px;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <h1>Loan Calculator</h1>
+    <label>Loan Amount ($):</label>
+    <input type="number" id="loanAmount" />
+
+    <label>APR (%):</label>
+    <input type="number" step="0.01" id="apr" />
+
+    <label>Monthly Payment ($):</label>
+    <input type="number" id="monthlyPayment" />
+
+    <button onclick="calculateLoan()">Calculate</button>
+
+    <h2>Result:</h2>
+    <pre id="result"></pre>
+
+    <script>
+        function formatCurrency(value) {
+            return value.toLocaleString('en-US', { style: 'currency', currency: 'USD' });
+        }
+
+        function calculateLoan() {
+            let loan = parseFloat(document.getElementById('loanAmount').value);
+            let apr = parseFloat(document.getElementById('apr').value);
+            let payment = parseFloat(document.getElementById('monthlyPayment').value);
+
+            let balance = loan;
+            let monthlyRate = apr / 12 / 100;
+            let totalPaid = 0;
+            let totalInterest = 0;
+            let month = 1;
+            let result = "Month\tInterest\tPrincipal\tBalance\n";
+
+            while (balance > 0) {
+                let interest = +(balance * monthlyRate).toFixed(2);
+                let principal = payment - interest;
+
+                if (principal > balance) {
+                    principal = balance;
+                    payment = interest + principal;
+                }
+
+                balance = +(balance - principal).toFixed(2);
+                totalPaid += payment;
+                totalInterest += interest;
+
+                result += `${month}\t${formatCurrency(interest)}\t${formatCurrency(principal)}\t${formatCurrency(balance)}\n`;
+                month++;
+            }
+
+            result += `\nTotal Paid: ${formatCurrency(totalPaid)}\n`;
+            result += `Total Interest: ${formatCurrency(totalInterest)}\n`;
+            result += `Months: ${month - 1}`;
+
+            document.getElementById('result').textContent = result;
+        }
+    </script>
+</body>
+</html>
